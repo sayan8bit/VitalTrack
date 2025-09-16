@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VitalTrack - Health Tracker</title>
+    <link rel="manifest" href="#" id="manifest-placeholder" />
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#667eea" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="VitalTrack" />
+
+    <!-- Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --success-gradient: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+        --warning-gradient: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        --bg-primary: #0f0f23;
+        --bg-secondary: #1a1a2e;
+        --bg-tertiary: #16213e;
+        --text-primary: #ffffff;
+        --text-secondary: #a0aec0;
+        --border-color: rgba(255, 255, 255, 0.1);
+        --shadow-light: 0 4px 20px rgba(102, 126, 234, 0.15);
+        --shadow-dark: 0 8px 40px rgba(0, 0, 0, 0.3);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.6;
+        overflow-x: hidden;
+      }
+
+      .app-container {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Header */
+      .header {
+        background: linear-gradient(
+          135deg,
+          rgba(102, 126, 234, 0.1) 0%,
+          rgba(118, 75, 162, 0.1) 100%
+        );
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .header-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .logo {
+        font-size: 1.5rem;
+        font-weight: 700;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .health-score {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50px;
+        backdrop-filter: blur(10px);
+      }
+
+      .score-ring {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+
+      /* Main Content */
+      .main-content {
+        flex: 1;
+        padding: 1rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        width: 100%;
+      }
+
+      /* Navigation */
+      .nav-tabs {
+        display: flex;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 0.25rem;
+        margin-bottom: 2rem;
+        backdrop-filter: blur(10px);
+      }
+
+      .nav-tab {
+        flex: 1;
+        padding: 0.75rem 1rem;
+        text-align: center;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+      }
+
+      .nav-tab.active {
+        background: var(--primary-gradient);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-light);
+      }
+
+      /* Card Styles */
+      .card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-dark);
+        border-color: rgba(102, 126, 234, 0.3);
+      }
+
+      .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: between;
+        margin-bottom: 1rem;
+      }
+
+      .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .icon {
+        width: 24px;
+        height: 24px;
+        background: var(--primary-gradient);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+      }
+
+      /* Tracker Cards */
+      .tracker-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 1rem 0;
+      }
+
+      .progress-fill {
+        height: 100%;
+        border-radius: 10px;
+        transition: width 0.6s ease;
+      }
+
+      .water-fill {
+        background: linear-gradient(90deg, #4ecdc4, #44a08d);
+      }
+      .steps-fill {
+        background: linear-gradient(90deg, #667eea, #764ba2);
+      }
+      .sleep-fill {
+        background: linear-gradient(90deg, #f093fb, #f5576c);
+      }
+
+      /* Input Controls */
+      .input-group {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+
+      .input-control {
+        display: flex;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 0.5rem;
+        border: 1px solid var(--border-color);
+      }
+
+      .btn {
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-light);
+      }
+
+      .btn-small {
+        padding: 0.5rem;
+        min-width: 40px;
+        justify-content: center;
+      }
+
+      .input-field {
+        background: transparent;
+        border: none;
+        color: var(--text-primary);
+        padding: 0.5rem;
+        width: 80px;
+        text-align: center;
+        font-size: 1rem;
+      }
+
+      /* Chart Container */
+      .chart-container {
+        height: 300px;
+        margin-top: 1rem;
+        position: relative;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 15px;
+        padding: 1rem;
+      }
+
+      /* Stats Grid */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+
+      .stat-item {
+        text-align: center;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 15px;
+        border: 1px solid var(--border-color);
+      }
+
+      .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+      }
+
+      /* Hidden Sections */
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .tracker-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .input-group {
+          flex-wrap: wrap;
+          gap: 0.5rem;
+        }
+
+        .header-content {
+          flex-direction: column;
+          gap: 1rem;
+        }
+      }
+
+      /* Settings */
+      .setting-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .setting-item:last-child {
+        border-bottom: none;
+      }
+
+      .toggle {
+        position: relative;
+        width: 50px;
+        height: 24px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .toggle.active {
+        background: var(--primary-gradient);
+      }
+
+      .toggle-slider {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 20px;
+        height: 20px;
+        background: white;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+      }
+
+      .toggle.active .toggle-slider {
+        transform: translateX(26px);
+      }
+
+      /* Floating Action Button */
+      .fab {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        width: 60px;
+        height: 60px;
+        background: var(--secondary-gradient);
+        border-radius: 50%;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        box-shadow: var(--shadow-dark);
+        transition: all 0.3s ease;
+        z-index: 1000;
+      }
+
+      .fab:hover {
+        transform: scale(1.1);
+      }
+
+      /* Notifications */
+      .notification {
+        position: fixed;
+        top: 100px;
+        right: 2rem;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 15px;
+        padding: 1rem 1.5rem;
+        min-width: 300px;
+        backdrop-filter: blur(20px);
+        transform: translateX(400px);
+        transition: transform 0.3s ease;
+        z-index: 1001;
+      }
+
+      .notification.show {
+        transform: translateX(0);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-container">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-content">
+          <div class="logo">❤️‍🩹 VitalTrack</div>
+          <div class="health-score">
+            <div class="score-ring" id="scoreRing">0</div>
+            <span>Health Score</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Navigation -->
+        <div class="nav-tabs">
+          <div class="nav-tab active" data-tab="today">Today</div>
+          <div class="nav-tab" data-tab="progress">Progress</div>
+          <div class="nav-tab" data-tab="insights">Insights</div>
+          <div class="nav-tab" data-tab="settings">Settings</div>
+        </div>
+
+        <!-- Today Tab -->
+        <div class="tab-content active" id="today">
+          <div class="tracker-grid">
+            <!-- Water Intake -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <div class="icon">💧</div>
+                  Water Intake
+                </h3>
+              </div>
+              <div id="waterProgress">0 / 8 glasses</div>
+              <div class="progress-bar">
+                <div
+                  class="progress-fill water-fill"
+                  id="waterBar"
+                  style="width: 0%"
+                ></div>
+              </div>
+              <div class="input-group">
+                <button class="btn btn-small" onclick="updateWater(-1)">
+                  -
+                </button>
+                <input
+                  type="number"
+                  class="input-field"
+                  id="waterInput"
+                  value="0"
+                  min="0"
+                  max="20"
+                />
+                <button class="btn btn-small" onclick="updateWater(1)">
+                  +
+                </button>
+                <button class="btn" onclick="setWater()">Update</button>
+              </div>
+            </div>
+
+            <!-- Steps -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <div class="icon">🚶</div>
+                  Steps
+                </h3>
+              </div>
+              <div id="stepsProgress">0 / 10,000 steps</div>
+              <div class="progress-bar">
+                <div
+                  class="progress-fill steps-fill"
+                  id="stepsBar"
+                  style="width: 0%"
+                ></div>
+              </div>
+              <div class="input-group">
+                <input
+                  type="number"
+                  class="input-field"
+                  id="stepsInput"
+                  value="0"
+                  min="0"
+                  max="50000"
+                  placeholder="Steps"
+                />
+                <button class="btn" onclick="setSteps()">Update</button>
+              </div>
+            </div>
+
+            <!-- Sleep -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <div class="icon">😴</div>
+                  Sleep
+                </h3>
+              </div>
+              <div id="sleepProgress">0 / 8 hours</div>
+              <div class="progress-bar">
+                <div
+                  class="progress-fill sleep-fill"
+                  id="sleepBar"
+                  style="width: 0%"
+                ></div>
+              </div>
+              <div class="input-group">
+                <input
+                  type="number"
+                  class="input-field"
+                  id="sleepInput"
+                  value="0"
+                  min="0"
+                  max="24"
+                  step="0.5"
+                  placeholder="Hours"
+                />
+                <button class="btn" onclick="setSleep()">Update</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Stats -->
+          <div class="card">
+            <h3 class="card-title">Today's Summary</h3>
+            <div class="stats-grid">
+              <div class="stat-item">
+                <div class="stat-value" id="todayWater">0</div>
+                <div class="stat-label">Glasses of Water</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" id="todaySteps">0</div>
+                <div class="stat-label">Steps Taken</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" id="todaySleep">0</div>
+                <div class="stat-label">Hours of Sleep</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" id="todayScore">0</div>
+                <div class="stat-label">Health Score</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Tab -->
+        <div class="tab-content" id="progress">
+          <div class="card">
+            <h3 class="card-title">7-Day Progress</h3>
+            <div class="chart-container">
+              <canvas id="progressChart" width="400" height="200"></canvas>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 class="card-title">Weekly Stats</h3>
+            <div class="stats-grid">
+              <div class="stat-item">
+                <div class="stat-value" id="weeklyAvgScore">0</div>
+                <div class="stat-label">Avg Health Score</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" id="weeklyWater">0</div>
+                <div class="stat-label">Total Water (glasses)</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" id="weeklySteps">0</div>
+                <div class="stat-label">Total Steps</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" id="weeklySleep">0</div>
+                <div class="stat-label">Avg Sleep (hours)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Insights Tab -->
+        <div class="tab-content" id="insights">
+          <div class="card">
+            <h3 class="card-title">Health Insights</h3>
+            <div id="insights-content">
+              <p>
+                Track your health for a few days to get personalized insights!
+              </p>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 class="card-title">Achievements</h3>
+            <div id="achievements-list">
+              <div class="stat-item">
+                <span>🎯 First Day Complete</span>
+                <span id="achievement-first">🔒</span>
+              </div>
+              <div class="stat-item">
+                <span>💪 Week Warrior</span>
+                <span id="achievement-week">🔒</span>
+              </div>
+              <div class="stat-item">
+                <span>💧 Hydration Hero</span>
+                <span id="achievement-water">🔒</span>
+              </div>
+              <div class="stat-item">
+                <span>🚶 Step Master</span>
+                <span id="achievement-steps">🔒</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div class="tab-content" id="settings">
+          <div class="card">
+            <h3 class="card-title">Goals</h3>
+            <div class="setting-item">
+              <span>Daily Water Goal (glasses)</span>
+              <input
+                type="number"
+                class="input-field"
+                id="waterGoal"
+                value="8"
+                min="1"
+                max="20"
+              />
+            </div>
+            <div class="setting-item">
+              <span>Daily Steps Goal</span>
+              <input
+                type="number"
+                class="input-field"
+                id="stepsGoal"
+                value="10000"
+                min="1000"
+                max="50000"
+              />
+            </div>
+            <div class="setting-item">
+              <span>Sleep Goal (hours)</span>
+              <input
+                type="number"
+                class="input-field"
+                id="sleepGoal"
+                value="8"
+                min="4"
+                max="12"
+                step="0.5"
+              />
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 class="card-title">Notifications</h3>
+            <div class="setting-item">
+              <span>Water Reminders</span>
+              <div class="toggle" id="waterNotifications">
+                <div class="toggle-slider"></div>
+              </div>
+            </div>
+            <div class="setting-item">
+              <span>Daily Check-in</span>
+              <div class="toggle" id="dailyNotifications">
+                <div class="toggle-slider"></div>
+              </div>
+            </div>
+            <div class="setting-item">
+              <span>Achievement Alerts</span>
+              <div class="toggle" id="achievementNotifications">
+                <div class="toggle-slider"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 class="card-title">Data</h3>
+            <div class="setting-item">
+              <button class="btn" onclick="exportData()">Export Data</button>
+              <button
+                class="btn"
+                onclick="clearData()"
+                style="background: linear-gradient(135deg, #ff6b6b, #ee5a24)"
+              >
+                Clear All Data
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Floating Action Button -->
+      <button class="fab" onclick="showQuickAdd()">+</button>
+
+      <!-- Notification -->
+      <div class="notification" id="notification">
+        <div id="notification-text"></div>
+      </div>
+    </div>
+
+    <script>
+      // PWA Registration
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register(
+          'data:text/javascript,console.log("SW loaded")'
+        );
+      }
+
+      // App State
+      let healthData = JSON.parse(localStorage.getItem("healthData") || "{}");
+      let settings = JSON.parse(
+        localStorage.getItem("healthSettings") ||
+          '{"waterGoal": 8, "stepsGoal": 10000, "sleepGoal": 8, "notifications": {"water": true, "daily": true, "achievement": true}}'
+      );
+
+      // Initialize today's data if not exists
+      const today = new Date().toDateString();
+      if (!healthData[today]) {
+        healthData[today] = { water: 0, steps: 0, sleep: 0 };
+      }
+
+      // Navigation
+      document.querySelectorAll(".nav-tab").forEach((tab) => {
+        tab.addEventListener("click", (e) => {
+          const targetTab = e.target.dataset.tab;
+          switchTab(targetTab);
+        });
+      });
+
+      function switchTab(tabName) {
+        document
+          .querySelectorAll(".nav-tab")
+          .forEach((t) => t.classList.remove("active"));
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((c) => c.classList.remove("active"));
+
+        document
+          .querySelector(`[data-tab="${tabName}"]`)
+          .classList.add("active");
+        document.getElementById(tabName).classList.add("active");
+
+        if (tabName === "progress") {
+          setTimeout(drawProgressChart, 100);
+        }
+        if (tabName === "insights") {
+          updateInsights();
+        }
+      }
+
+      // Water Functions
+      function updateWater(change) {
+        const input = document.getElementById("waterInput");
+        const newValue = Math.max(
+          0,
+          Math.min(20, parseInt(input.value) + change)
+        );
+        input.value = newValue;
+      }
+
+      function setWater() {
+        const value = parseInt(document.getElementById("waterInput").value);
+        healthData[today].water = value;
+        saveData();
+        updateUI();
+
+        if (value >= settings.waterGoal) {
+          showNotification("🎉 Daily water goal achieved!");
+          checkAchievements();
+        }
+      }
+
+      function setSteps() {
+        const value = parseInt(document.getElementById("stepsInput").value);
+        healthData[today].steps = value;
+        saveData();
+        updateUI();
+
+        if (value >= settings.stepsGoal) {
+          showNotification("🎉 Daily steps goal achieved!");
+          checkAchievements();
+        }
+      }
+
+      function setSleep() {
+        const value = parseFloat(document.getElementById("sleepInput").value);
+        healthData[today].sleep = value;
+        saveData();
+        updateUI();
+
+        if (value >= settings.sleepGoal) {
+          showNotification("🎉 Sleep goal achieved!");
+          checkAchievements();
+        }
+      }
+
+      // Calculate Health Score
+      function calculateHealthScore(data) {
+        const waterScore = Math.min(
+          100,
+          (data.water / settings.waterGoal) * 100
+        );
+        const stepsScore = Math.min(
+          100,
+          (data.steps / settings.stepsGoal) * 100
+        );
+        const sleepScore = Math.min(
+          100,
+          (data.sleep / settings.sleepGoal) * 100
+        );
+
+        return Math.round((waterScore + stepsScore + sleepScore) / 3);
+      }
+
+      // Update UI
+      function updateUI() {
+        const data = healthData[today];
+
+        // Water
+        document.getElementById(
+          "waterProgress"
+        ).textContent = `${data.water} / ${settings.waterGoal} glasses`;
+        document.getElementById("waterBar").style.width = `${Math.min(
+          100,
+          (data.water / settings.waterGoal) * 100
+        )}%`;
+        document.getElementById("waterInput").value = data.water;
+
+        // Steps
+        document.getElementById(
+          "stepsProgress"
+        ).textContent = `${data.steps.toLocaleString()} / ${settings.stepsGoal.toLocaleString()} steps`;
+        document.getElementById("stepsBar").style.width = `${Math.min(
+          100,
+          (data.steps / settings.stepsGoal) * 100
+        )}%`;
+        document.getElementById("stepsInput").value = data.steps;
+
+        // Sleep
+        document.getElementById(
+          "sleepProgress"
+        ).textContent = `${data.sleep} / ${settings.sleepGoal} hours`;
+        document.getElementById("sleepBar").style.width = `${Math.min(
+          100,
+          (data.sleep / settings.sleepGoal) * 100
+        )}%`;
+        document.getElementById("sleepInput").value = data.sleep;
+
+        // Health Score
+        const score = calculateHealthScore(data);
+        document.getElementById("scoreRing").textContent = score;
+        document.getElementById(
+          "scoreRing"
+        ).style.background = `conic-gradient(#667eea ${
+          score * 3.6
+        }deg, rgba(255,255,255,0.1) 0deg)`;
+
+        // Stats
+        document.getElementById("todayWater").textContent = data.water;
+        document.getElementById("todaySteps").textContent =
+          data.steps.toLocaleString();
+        document.getElementById("todaySleep").textContent = data.sleep;
+        document.getElementById("todayScore").textContent = score;
+
+        updateWeeklyStats();
+      }
+
+      function updateWeeklyStats() {
+        const last7Days = getLast7Days();
+        let totalWater = 0,
+          totalSteps = 0,
+          totalSleep = 0,
+          totalScore = 0,
+          daysWithData = 0;
+
+        last7Days.forEach((date) => {
+          if (healthData[date]) {
+            totalWater += healthData[date].water;
+            totalSteps += healthData[date].steps;
+            totalSleep += healthData[date].sleep;
+            totalScore += calculateHealthScore(healthData[date]);
+            daysWithData++;
+          }
+        });
+
+        document.getElementById("weeklyAvgScore").textContent = daysWithData
+          ? Math.round(totalScore / daysWithData)
+          : 0;
+        document.getElementById("weeklyWater").textContent = totalWater;
+        document.getElementById("weeklySteps").textContent =
+          totalSteps.toLocaleString();
+        document.getElementById("weeklySleep").textContent = daysWithData
+          ? (totalSleep / daysWithData).toFixed(1)
+          : 0;
+      }
+
+      function getLast7Days() {
+        const dates = [];
+        for (let i = 6; i >= 0; i--) {
+          const date = new Date();
+          date.setDate(date.getDate() - i);
+          dates.push(date.toDateString());
+        }
+        return dates;
+      }
+
+      // Progress Chart
+      function drawProgressChart() {
+        const canvas = document.getElementById("progressChart");
+        const ctx = canvas.getContext("2d");
+        const last7Days = getLast7Days();
+
+        // Set canvas size
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+
+        const width = canvas.width;
+        const height = canvas.height;
+        const padding = 40;
+
+        // Clear canvas
+        ctx.clearRect(0, 0, width, height);
+
+        // Chart data
+        const scores = last7Days.map((date) =>
+          healthData[date] ? calculateHealthScore(healthData[date]) : 0
+        );
+
+        // Draw grid
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+        ctx.lineWidth = 1;
+
+        for (let i = 0; i <= 4; i++) {
+          const y = padding + ((height - 2 * padding) * i) / 4;
+          ctx.beginPath();
+          ctx.moveTo(padding, y);
+          ctx.lineTo(width - padding, y);
+          ctx.stroke();
+        }
+
+        // Draw chart line
+        ctx.strokeStyle = "#667eea";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+
+        scores.forEach((score, index) => {
+          const x =
+            padding + ((width - 2 * padding) * index) / (scores.length - 1);
+          const y = height - padding - ((height - 2 * padding) * score) / 100;
+
+          if (index === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        });
+        ctx.stroke();
+
+        // Draw points
+        ctx.fillStyle = "#667eea";
+        scores.forEach((score, index) => {
+          const x =
+            padding + ((width - 2 * padding) * index) / (scores.length - 1);
+          const y = height - padding - ((height - 2 * padding) * score) / 100;
+
+          ctx.beginPath();
+          ctx.arc(x, y, 4, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        // Draw labels
+        ctx.fillStyle = "#a0aec0";
+        ctx.font = "12px Inter";
+        ctx.textAlign = "center";
+
+        last7Days.forEach((date, index) => {
+          const x =
+            padding + ((width - 2 * padding) * index) / (scores.length - 1);
+          const shortDate = new Date(date).toLocaleDateString("en", {
+            weekday: "short",
+          });
+          ctx.fillText(shortDate, x, height - 10);
+        });
+      }
+
+      // Insights
+      function updateInsights() {
+        const last7Days = getLast7Days();
+        const recentData = last7Days
+          .map((date) => healthData[date])
+          .filter((d) => d);
+
+        if (recentData.length === 0) {
+          document.getElementById("insights-content").innerHTML =
+            "<p>Track your health for a few days to get personalized insights!</p>";
+          return;
+        }
+
+        const avgWater =
+          recentData.reduce((sum, d) => sum + d.water, 0) / recentData.length;
+        const avgSteps =
+          recentData.reduce((sum, d) => sum + d.steps, 0) / recentData.length;
+        const avgSleep =
+          recentData.reduce((sum, d) => sum + d.sleep, 0) / recentData.length;
+
+        let insights = ['<div class="stats-grid">'];
+
+        // Water insights
+        if (avgWater < settings.waterGoal * 0.7) {
+          insights.push(
+            '<div class="stat-item"><div class="stat-value">💧</div><div class="stat-label">Try setting hourly water reminders to improve hydration</div></div>'
+          );
+        } else if (avgWater >= settings.waterGoal) {
+          insights.push(
+            '<div class="stat-item"><div class="stat-value">🎉</div><div class="stat-label">Great hydration habits! Keep it up!</div></div>'
+          );
+        }
+
+        // Steps insights
+        if (avgSteps < settings.stepsGoal * 0.7) {
+          insights.push(
+            '<div class="stat-item"><div class="stat-value">🚶</div><div class="stat-label">Consider taking a 10-minute walk after meals</div></div>'
+          );
+        } else if (avgSteps >= settings.stepsGoal) {
+          insights.push(
+            '<div class="stat-item"><div class="stat-value">💪</div><div class="stat-label">Excellent activity level! You\'re crushing your step goals!</div></div>'
+          );
+        }
+
+        // Sleep insights
+        if (avgSleep < settings.sleepGoal * 0.8) {
+          insights.push(
+            '<div class="stat-item"><div class="stat-value">😴</div><div class="stat-label">Better sleep can improve your energy and health score</div></div>'
+          );
+        } else if (avgSleep >= settings.sleepGoal) {
+          insights.push(
+            '<div class="stat-item"><div class="stat-value">🌙</div><div class="stat-label">Great sleep patterns! Your body thanks you!</div></div>'
+          );
+        }
+
+        insights.push("</div>");
+        document.getElementById("insights-content").innerHTML =
+          insights.join("");
+      }
+
+      // Achievements
+      function checkAchievements() {
+        const data = healthData[today];
+
+        // First Day Complete
+        if (data.water > 0 && data.steps > 0 && data.sleep > 0) {
+          document.getElementById("achievement-first").textContent = "✅";
+        }
+
+        // Week Warrior (7 consecutive days)
+        const last7Days = getLast7Days();
+        const consecutiveDays = last7Days.every((date) => {
+          const d = healthData[date];
+          return d && d.water > 0 && d.steps > 0 && d.sleep > 0;
+        });
+        if (consecutiveDays) {
+          document.getElementById("achievement-week").textContent = "✅";
+        }
+
+        // Hydration Hero (goal 5 days in a row)
+        let waterStreak = 0;
+        for (let i = 6; i >= 0; i--) {
+          const date = new Date();
+          date.setDate(date.getDate() - i);
+          const dateStr = date.toDateString();
+          const d = healthData[dateStr];
+          if (d && d.water >= settings.waterGoal) {
+            waterStreak++;
+          } else {
+            waterStreak = 0;
+          }
+        }
+        if (waterStreak >= 5) {
+          document.getElementById("achievement-water").textContent = "✅";
+        }
+
+        // Step Master (goal 5 days in a row)
+        let stepStreak = 0;
+        for (let i = 6; i >= 0; i--) {
+          const date = new Date();
+          date.setDate(date.getDate() - i);
+          const dateStr = date.toDateString();
+          const d = healthData[dateStr];
+          if (d && d.steps >= settings.stepsGoal) {
+            stepStreak++;
+          } else {
+            stepStreak = 0;
+          }
+        }
+        if (stepStreak >= 5) {
+          document.getElementById("achievement-steps").textContent = "✅";
+        }
+      }
+
+      // Settings
+      document.getElementById("waterGoal").addEventListener("change", (e) => {
+        settings.waterGoal = parseInt(e.target.value);
+        saveSettings();
+        updateUI();
+      });
+
+      document.getElementById("stepsGoal").addEventListener("change", (e) => {
+        settings.stepsGoal = parseInt(e.target.value);
+        saveSettings();
+        updateUI();
+      });
+
+      document.getElementById("sleepGoal").addEventListener("change", (e) => {
+        settings.sleepGoal = parseFloat(e.target.value);
+        saveSettings();
+        updateUI();
+      });
+
+      // Toggles
+      document.querySelectorAll(".toggle").forEach((toggle) => {
+        toggle.addEventListener("click", (e) => {
+          e.target.classList.toggle("active");
+          const settingName = e.target.id.replace("Notifications", "");
+          settings.notifications[settingName] =
+            e.target.classList.contains("active");
+          saveSettings();
+        });
+      });
+
+      // Data Management
+      function exportData() {
+        const dataStr = JSON.stringify({ healthData, settings }, null, 2);
+        const dataBlob = new Blob([dataStr], { type: "application/json" });
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "health-tracker-data.json";
+        link.click();
+        URL.revokeObjectURL(url);
+        showNotification("✅ Data exported successfully!");
+      }
+
+      function clearData() {
+        if (
+          confirm(
+            "Are you sure you want to clear all data? This cannot be undone."
+          )
+        ) {
+          healthData = {};
+          healthData[today] = { water: 0, steps: 0, sleep: 0 };
+          saveData();
+          updateUI();
+          showNotification("🗑️ All data cleared");
+        }
+      }
+
+      // Quick Add FAB
+      function showQuickAdd() {
+        const actions = [
+          {
+            text: "💧 +1 Water",
+            action: () => {
+              updateWater(1);
+              setWater();
+            },
+          },
+          {
+            text: "🚶 +1000 Steps",
+            action: () => {
+              const current = parseInt(
+                document.getElementById("stepsInput").value
+              );
+              document.getElementById("stepsInput").value = current + 1000;
+              setSteps();
+            },
+          },
+          {
+            text: "😴 Set Sleep",
+            action: () => {
+              const hours = prompt("Hours of sleep:");
+              if (hours && !isNaN(hours)) {
+                document.getElementById("sleepInput").value = hours;
+                setSleep();
+              }
+            },
+          },
+        ];
+
+        const actionText = actions
+          .map((a, i) => `${i + 1}. ${a.text}`)
+          .join("\n");
+        const choice = prompt(
+          `Quick Add:\n${actionText}\n\nEnter choice (1-3):`
+        );
+
+        if (choice && choice >= 1 && choice <= 3) {
+          actions[choice - 1].action();
+        }
+      }
+
+      // Notifications
+      function showNotification(text) {
+        const notification = document.getElementById("notification");
+        document.getElementById("notification-text").textContent = text;
+        notification.classList.add("show");
+
+        setTimeout(() => {
+          notification.classList.remove("show");
+        }, 3000);
+      }
+
+      // PWA Notifications
+      function requestNotificationPermission() {
+        if ("Notification" in window && navigator.serviceWorker) {
+          Notification.requestPermission().then((permission) => {
+            if (permission === "granted") {
+              scheduleNotifications();
+            }
+          });
+        }
+      }
+
+      function scheduleNotifications() {
+        // Water reminder every 2 hours
+        if (settings.notifications.water) {
+          setInterval(() => {
+            if (healthData[today].water < settings.waterGoal) {
+              new Notification("💧 VitalTrack", {
+                body: "Time for a water break! Stay hydrated!",
+                icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">💧</text></svg>',
+              });
+            }
+          }, 2 * 60 * 60 * 1000); // 2 hours
+        }
+      }
+
+      // Storage
+      function saveData() {
+        localStorage.setItem("healthData", JSON.stringify(healthData));
+      }
+
+      function saveSettings() {
+        localStorage.setItem("healthSettings", JSON.stringify(settings));
+      }
+
+      // Load settings into UI
+      function loadSettings() {
+        document.getElementById("waterGoal").value = settings.waterGoal;
+        document.getElementById("stepsGoal").value = settings.stepsGoal;
+        document.getElementById("sleepGoal").value = settings.sleepGoal;
+
+        // Set toggles
+        Object.keys(settings.notifications).forEach((key) => {
+          const toggle = document.getElementById(key + "Notifications");
+          if (toggle && settings.notifications[key]) {
+            toggle.classList.add("active");
+          }
+        });
+      }
+
+      // Initialize App
+      function initApp() {
+        loadSettings();
+        updateUI();
+        checkAchievements();
+        requestNotificationPermission();
+
+        // Auto-save every 30 seconds
+        setInterval(saveData, 30000);
+      }
+
+      // Start the app
+      initApp();
+
+      // PWA Install
+      let deferredPrompt;
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        showNotification(
+          "📱 Install VitalTrack as an app for the best experience!"
+        );
+      });
+
+      // Manifest
+      const manifest = {
+        name: "VitalTrack - Health Tracker",
+        short_name: "VitalTrack",
+        description: "Track your water intake, steps, and sleep offline",
+        start_url: "/",
+        display: "standalone",
+        theme_color: "#667eea",
+        background_color: "#0f0f23",
+        icons: [
+          {
+            src: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">❤️‍🩹</text></svg>',
+            sizes: "192x192",
+            type: "image/svg+xml",
+          },
+        ],
+      };
+
+      const manifestBlob = new Blob([JSON.stringify(manifest)], {
+        type: "application/json",
+      });
+      const manifestURL = URL.createObjectURL(manifestBlob);
+      document.getElementById("manifest-placeholder").href = manifestURL;
+    </script>
+  </body>
+</html>
