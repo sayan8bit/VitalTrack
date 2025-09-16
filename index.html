@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>VitalTrack - Health Tracker</title>
-    <link rel="manifest" href="#" id="manifest-placeholder" />
+    <link rel="manifest" href="./manifest.json" />
 
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#667eea" />
@@ -742,9 +742,27 @@
     <script>
       // PWA Registration
       if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register(
-          'data:text/javascript,console.log("SW loaded")'
-        );
+        navigator.serviceWorker
+          .register("./service-worker.js")
+          .then((registration) => {
+            console.log("SW registered successfully");
+
+            // Check for updates
+            registration.addEventListener("updatefound", () => {
+              const newWorker = registration.installing;
+              newWorker.addEventListener("statechange", () => {
+                if (
+                  newWorker.state === "installed" &&
+                  navigator.serviceWorker.controller
+                ) {
+                  showNotification(
+                    "🆕 App updated! Refresh to get the latest version."
+                  );
+                }
+              });
+            });
+          })
+          .catch((err) => console.log("SW registration failed"));
       }
 
       // App State
@@ -1312,40 +1330,6 @@
 
       // Start the app
       initApp();
-
-      // PWA Install
-      let deferredPrompt;
-      window.addEventListener("beforeinstallprompt", (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        showNotification(
-          "📱 Install VitalTrack as an app for the best experience!"
-        );
-      });
-
-      // Manifest
-      const manifest = {
-        name: "VitalTrack - Health Tracker",
-        short_name: "VitalTrack",
-        description: "Track your water intake, steps, and sleep offline",
-        start_url: "/",
-        display: "standalone",
-        theme_color: "#667eea",
-        background_color: "#0f0f23",
-        icons: [
-          {
-            src: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">❤️‍🩹</text></svg>',
-            sizes: "192x192",
-            type: "image/svg+xml",
-          },
-        ],
-      };
-
-      const manifestBlob = new Blob([JSON.stringify(manifest)], {
-        type: "application/json",
-      });
-      const manifestURL = URL.createObjectURL(manifestBlob);
-      document.getElementById("manifest-placeholder").href = manifestURL;
     </script>
   </body>
 </html>
