@@ -2,7 +2,7 @@
   "name": "VitalTrack - Health Tracker",
   "short_name": "VitalTrack",
   "description": "Track your water intake, steps, and sleep offline with premium design",
-  "start_url": "/",
+  "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait-primary",
   "theme_color": "#667eea",
@@ -43,4 +43,5 @@
       ]
     }
   ]
+
 }
